@@ -18,7 +18,7 @@ Get a MusicLink API key from [the MusicLink dashboard](https://musiclink.one/das
 npm run dev
 ```
 
-Open **http://127.0.0.1:5173**. One process serves the API and Vite with React hot reload. Restart after changing `.env`. Without a key the UI works, but lookup requests return a clear setup error. There are no fake or hardcoded matches in the app. “Try an example” makes a live lookup of the Spotify track from the brief.
+Open **http://127.0.0.1:5173**. One process serves the API and Vite with React hot reload. Restart after changing `.env`. Without a key the UI works, but lookup requests return a clear setup error. There are no fake or hardcoded matches in the app. “Try an example” makes a live lookup of [“I’ll Be There” by Me First and the Gimme Gimmes](https://open.spotify.com/track/03Mh5n7N3Qz7LTrs1sV5mS).
 
 ## How matching works
 
@@ -28,7 +28,7 @@ Open **http://127.0.0.1:5173**. One process serves the API and Vite with React h
 
 Supported inputs: `open.spotify.com` track/album URLs (including localized URLs), `music.apple.com` song/album URLs (including `?i=` track links), `open.qobuz.com` and `play.qobuz.com` track/album URLs, and Qobuz’s regional public album/track URLs. Paste full links; shortened share URLs, playlists, and artists are outside this first version.
 
-MusicLink requires an account/API key and has plan quotas. A first lookup can take 10–15 seconds; the MusicLink request times out after 30 seconds. Qobuz metadata has a separate 10-second timeout. Matches depend on provider coverage and regional catalogs; this app cannot guarantee every service or edition will match. Live verification of the supplied Spotify example returned artwork and all three links using an API key already available in the environment. The provider currently credits it to “Spike and the Gimme Gimmes”; the app displays returned metadata without overriding it.
+MusicLink requires an account/API key and has plan quotas. A first lookup can take 10–15 seconds; the MusicLink request times out after 30 seconds. Qobuz metadata has a separate 10-second timeout. Matches depend on provider coverage and regional catalogs; this app cannot guarantee every service or edition will match. The app displays the provider’s returned metadata without overriding it.
 
 **Qobuz limitation:** although MusicLink lists Qobuz among its platforms, a live Qobuz URL request returned “Could not detect platform.” The Qobuz adapter avoids that unsupported input path. Fresh Qobuz lookups need `QOBUZ_APP_ID`; this adapter is covered by mocked tests but requires your issued key for live verification. Qobuz requires a valid application key under its [API terms](https://static.qobuz.com/apps/api/QobuzAPI-TermsofUse.pdf). Previously returned links resolve from the in-memory cache until it expires.
 
@@ -46,7 +46,7 @@ npm start
 
 Tests cover input validation, tracking removal, Apple track identity, numbered copying, provider errors/timeouts, cache reuse, missing configuration, untrusted provider URLs, loading/results, partial matches, and clipboard failures. Provider responses in tests are synthetic fixtures, not verified catalog mappings.
 
-Verified locally: 37 tests pass; production build and production HTTP smoke checks pass. Chrome checks cover desktop, 390 px and 320 px layouts, real clipboard copying, and live example results. The live Abbey Road album lookup returned Spotify and Apple Music, with Qobuz correctly shown as unavailable.
+Verified locally: 37 tests pass; production build and production HTTP smoke checks pass. Chrome checks cover desktop, 390 px and 320 px layouts, real clipboard copying, and live lookup results. The live Abbey Road album lookup returned Spotify and Apple Music, with Qobuz correctly shown as unavailable.
 
 ## Linting and formatting
 

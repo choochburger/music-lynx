@@ -3,7 +3,7 @@ import { Service, exampleUrl, formatLinks, parseMusicUrl } from './music';
 
 describe('music URL validation', () => {
   it('removes tracking while retaining Apple Music’s song identity', () => {
-    expect(parseMusicUrl(`${exampleUrl}?si=tracking#fragment`).url).toBe(exampleUrl);
+    expect(parseMusicUrl(`${exampleUrl}?si=96f395cedf1445ef#fragment`).url).toBe(exampleUrl);
     const apple = parseMusicUrl('https://music.apple.com/us/album/a-title/123456?i=78910&ls=1');
     expect(apple).toEqual({
       service: Service.AppleMusic,
@@ -18,7 +18,7 @@ describe('music URL validation', () => {
     ['https://www.qobuz.com/us-en/album/a-title/abc123', Service.Qobuz, 'album'],
     ['https://music.apple.com/us/song/a-title/123456', Service.AppleMusic, 'track'],
     ['https://music.apple.com/us/album/a-title/123456', Service.AppleMusic, 'album'],
-    ['https://open.spotify.com/intl-de/album/2DAvoJU1ZjcWVd8jL0OR8s', Service.Spotify, 'album'],
+    ['https://open.spotify.com/intl-de/album/03Mh5n7N3Qz7LTrs1sV5mS', Service.Spotify, 'album'],
   ])('recognizes %s', (url, service, type) => {
     expect(parseMusicUrl(url)).toMatchObject({ service, type });
   });
@@ -29,7 +29,7 @@ describe('music URL validation', () => {
     'https://open.spotify.com.evil.test/track/123',
     'https://user:password@open.qobuz.com/track/123',
     'https://open.qobuz.com:8443/track/123',
-    'https://open.spotify.com/playlist/2DAvoJU1ZjcWVd8jL0OR8s',
+    'https://open.spotify.com/playlist/03Mh5n7N3Qz7LTrs1sV5mS',
     'https://music.apple.com/us/album/a/123?i=bad',
     'https://localhost/track/123',
     'javascript:alert(1)',

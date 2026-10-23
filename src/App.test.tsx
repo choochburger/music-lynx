@@ -9,7 +9,7 @@ afterEach(() => {
 });
 const entity = {
   type: 'track',
-  title: "It's Raining Men",
+  title: "I'll Be There",
   artist: 'Me First and the Gimme Gimmes',
   artwork: 'https://example.com/cover.jpg',
   links: {
@@ -48,6 +48,10 @@ describe('the share flow', () => {
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: /Try an example/ }));
     expect(screen.getByText('Following the music…')).toBeTruthy();
+    expect(fetch).toHaveBeenCalledWith(
+      `/api/resolve?url=${encodeURIComponent(exampleUrl)}`,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     resolve(Response.json(entity));
     expect(await screen.findByRole('heading', { name: entity.title })).toBeTruthy();
     expect(screen.getByRole('img').getAttribute('src')).toBe(entity.artwork);

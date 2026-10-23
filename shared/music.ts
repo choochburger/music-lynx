@@ -18,7 +18,7 @@ export type MusicEntity = {
   links: Partial<Record<Service, string>>;
 };
 
-export const exampleUrl = 'https://open.spotify.com/track/2DAvoJU1ZjcWVd8jL0OR8s';
+export const exampleUrl = 'https://open.spotify.com/track/03Mh5n7N3Qz7LTrs1sV5mS';
 
 export function parseMusicUrl(input: string): {
   url: string;
