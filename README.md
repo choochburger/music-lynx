@@ -1,6 +1,10 @@
 # Music Lynx
 
+> **Toy project:** This is a playground for messing around with Codex and music service APIs. I know there are already apps that do similar things -- this is just for fun and experimentation to make sharing generating and sharing music links with my friends easier 🤪 🎶
+
 A React + TypeScript SPA for sharing songs and albums between different services (Spotify, Apple Music, Qobuz, etc).
+
+Try the live app at [music-lynx.onrender.com](https://music-lynx.onrender.com/).
 
 ## Local development
 
