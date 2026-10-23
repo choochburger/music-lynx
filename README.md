@@ -1,6 +1,6 @@
 # Music Lynx
 
-A React + TypeScript SPA for sharing songs and albums between Spotify, Qobuz, and Apple Music. Inspired by `wireframe.jpg`, with a responsive layout, artwork, individual link copying, and a numbered “Copy all!” list.
+A React + TypeScript SPA for sharing songs and albums between different services (Spotify, Apple Music, Qobuz, etc).
 
 ## Local development
 
