@@ -16,6 +16,57 @@ const item = {
 };
 
 describe('live resolver adapter', () => {
+  it('matches a shared Apple Music URL to the same song in the provider’s canonical URL', async () => {
+    const input = 'https://music.apple.com/us/song/marlboro-rojo/1811903401';
+    const canonical = 'https://music.apple.com/song/1811903401';
+    const request = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        success: true,
+        data: [
+          {
+            ...item,
+            title: 'Different song',
+            platforms: { [Service.AppleMusic]: 'https://music.apple.com/song/1811903402' },
+          },
+          {
+            ...item,
+            title: 'Marlboro Rojo',
+            artist: 'Fuerza Regida',
+            platforms: { ...item.platforms, [Service.AppleMusic]: canonical },
+          },
+        ],
+      }),
+    );
+    const resolver = createResolver('test-key', request);
+    const result = await resolver(input);
+    expect(result.title).toBe('Marlboro Rojo');
+    expect(result.links[Service.AppleMusic]).toBe(input);
+    expect(result.links[Service.Spotify]).toBe(exampleUrl);
+    await resolver(canonical);
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a genuinely different Apple recording rather than matching by title', async () => {
+    const request = vi.fn<typeof fetch>().mockResolvedValue(
+      Response.json({
+        success: true,
+        data: [
+          {
+            ...item,
+            title: 'Marlboro Rojo',
+            platforms: { [Service.AppleMusic]: 'https://music.apple.com/song/1811903402' },
+          },
+        ],
+      }),
+    );
+    await expect(
+      createResolver(
+        'test-key',
+        request,
+      )('https://music.apple.com/us/song/marlboro-rojo/1811903401'),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+
   it('maps provider data, keeps credentials server-side, and caches equivalent inputs', async () => {
     const request = vi
       .fn<typeof fetch>()

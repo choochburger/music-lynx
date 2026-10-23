@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { Service, exampleUrl, formatLinks, parseMusicUrl } from './music';
+import { Service, exampleUrl, formatLinks, musicEntityKey, parseMusicUrl } from './music';
 
 describe('music URL validation', () => {
+  it('identifies Apple songs across storefront, slug, and album-track URL forms', () => {
+    const key = musicEntityKey('https://music.apple.com/song/1811903401');
+    expect(musicEntityKey('https://music.apple.com/us/song/marlboro-rojo/1811903401')).toBe(key);
+    expect(musicEntityKey('https://music.apple.com/gb/album/album-title/123?i=1811903401')).toBe(
+      key,
+    );
+    expect(musicEntityKey('https://music.apple.com/us/song/different-song/1811903402')).not.toBe(
+      key,
+    );
+    expect(musicEntityKey('https://music.apple.com/us/album/album-title/1811903401')).not.toBe(key);
+    expect(musicEntityKey('https://open.qobuz.com/track/1811903401')).not.toBe(key);
+  });
+
   it('removes tracking while retaining Apple Music’s song identity', () => {
     expect(parseMusicUrl(`${exampleUrl}?si=96f395cedf1445ef#fragment`).url).toBe(exampleUrl);
     const apple = parseMusicUrl('https://music.apple.com/us/album/a-title/123456?i=78910&ls=1');

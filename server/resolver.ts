@@ -1,4 +1,10 @@
-import { parseMusicUrl, Service, services, type MusicEntity } from '../shared/music.js';
+import {
+  musicEntityKey,
+  parseMusicUrl,
+  Service,
+  services,
+  type MusicEntity,
+} from '../shared/music.js';
 import { qobuzIdentifier } from './qobuz.js';
 import { ResolveError } from './errors.js';
 export { ResolveError } from './errors.js';
@@ -35,7 +41,8 @@ export function createResolver(
     } catch (error) {
       throw new ResolveError(400, (error as Error).message);
     }
-    const cached = cache.get(source.url);
+    const sourceKey = musicEntityKey(source.url);
+    const cached = cache.get(sourceKey);
     if (cached && cached.expires > Date.now()) return cached.entity;
     if (!apiKey)
       throw new ResolveError(
@@ -99,7 +106,7 @@ export function createResolver(
       candidates.find((entry) => {
         const link = entry.platforms?.[source.service];
         try {
-          return typeof link === 'string' && parseMusicUrl(link).url === source.url;
+          return typeof link === 'string' && musicEntityKey(link) === sourceKey;
         } catch {
           return false;
         }
@@ -130,7 +137,7 @@ export function createResolver(
     // A validated returned link can also resolve back to this result during the cache lifetime.
     for (const url of Object.values(links)) {
       if (cache.size >= 150) cache.delete(cache.keys().next().value!);
-      cache.set(url, { entity, expires: Date.now() + 60 * 60 * 1000 });
+      cache.set(musicEntityKey(url), { entity, expires: Date.now() + 60 * 60 * 1000 });
     }
     return entity;
   };

@@ -85,3 +85,13 @@ export function formatLinks(entity: MusicEntity): string {
     .map(({ id, name }, index) => `${index + 1}. ${name}: ${entity.links[id]}`)
     .join('\n');
 }
+
+/** Identity is independent of storefront, title slug, and share-link formatting. */
+export function musicEntityKey(input: string): string {
+  const parsed = parseMusicUrl(input);
+  const url = new URL(parsed.url);
+  const id =
+    (parsed.service === Service.AppleMusic && url.searchParams.get('i')) ||
+    url.pathname.split('/').filter(Boolean).at(-1)!;
+  return `${parsed.service}:${parsed.type}:${id}`;
+}
