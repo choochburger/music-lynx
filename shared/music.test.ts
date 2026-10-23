@@ -5,7 +5,11 @@ describe('music URL validation', () => {
   it('removes tracking while retaining Apple Music’s song identity', () => {
     expect(parseMusicUrl(`${exampleUrl}?si=tracking#fragment`).url).toBe(exampleUrl);
     const apple = parseMusicUrl('https://music.apple.com/us/album/a-title/123456?i=78910&ls=1');
-    expect(apple).toEqual({ service: 'apple_music', type: 'track', url: 'https://music.apple.com/us/album/a-title/123456?i=78910' });
+    expect(apple).toEqual({
+      service: 'apple_music',
+      type: 'track',
+      url: 'https://music.apple.com/us/album/a-title/123456?i=78910',
+    });
   });
 
   it.each([
@@ -20,15 +24,30 @@ describe('music URL validation', () => {
   });
 
   it.each([
-    'not a URL', 'http://open.qobuz.com/track/123', 'https://open.spotify.com.evil.test/track/123',
-    'https://user:password@open.qobuz.com/track/123', 'https://open.qobuz.com:8443/track/123',
-    'https://open.spotify.com/playlist/2DAvoJU1ZjcWVd8jL0OR8s', 'https://music.apple.com/us/album/a/123?i=bad',
-    'https://localhost/track/123', 'javascript:alert(1)',
-  ])('rejects unsupported or unsafe input: %s', (url) => expect(() => parseMusicUrl(url)).toThrow());
+    'not a URL',
+    'http://open.qobuz.com/track/123',
+    'https://open.spotify.com.evil.test/track/123',
+    'https://user:password@open.qobuz.com/track/123',
+    'https://open.qobuz.com:8443/track/123',
+    'https://open.spotify.com/playlist/2DAvoJU1ZjcWVd8jL0OR8s',
+    'https://music.apple.com/us/album/a/123?i=bad',
+    'https://localhost/track/123',
+    'javascript:alert(1)',
+  ])('rejects unsupported or unsafe input: %s', (url) =>
+    expect(() => parseMusicUrl(url)).toThrow(),
+  );
 
   it('copies available links in stable numbered service order', () => {
-    expect(formatLinks({ type: 'track', title: 'Song', artist: 'Artist', links: {
-      apple_music: 'https://music.apple.com/song/123', spotify: exampleUrl,
-    } })).toBe(`1. Spotify: ${exampleUrl}\n2. Apple Music: https://music.apple.com/song/123`);
+    expect(
+      formatLinks({
+        type: 'track',
+        title: 'Song',
+        artist: 'Artist',
+        links: {
+          apple_music: 'https://music.apple.com/song/123',
+          spotify: exampleUrl,
+        },
+      }),
+    ).toBe(`1. Spotify: ${exampleUrl}\n2. Apple Music: https://music.apple.com/song/123`);
   });
 });

@@ -4,7 +4,7 @@ A React + TypeScript SPA for sharing songs and albums between Spotify, Qobuz, an
 
 ## Local development
 
-Requires Node.js 22.12+ (Node 24 recommended) and npm.
+Requires Node.js 22.13+ in the 22.x line, or Node.js 24+ (recommended), and npm.
 
 ```sh
 nvm use
@@ -47,6 +47,23 @@ npm start
 Tests cover input validation, tracking removal, Apple track identity, numbered copying, provider errors/timeouts, cache reuse, missing configuration, untrusted provider URLs, loading/results, partial matches, and clipboard failures. Provider responses in tests are synthetic fixtures, not verified catalog mappings.
 
 Verified locally: 37 tests pass; production build and production HTTP smoke checks pass. Chrome checks cover desktop, 390 px and 320 px layouts, real clipboard copying, and live example results. The live Abbey Road album lookup returned Spotify and Apple Music, with Qobuz correctly shown as unavailable.
+
+## Linting and formatting
+
+ESLint uses `eslint.config.js` with recommended JavaScript/TypeScript checks, React Hooks checks, and Vite Fast Refresh rules. Unused variables are errors; intentionally unused parameters can start with `_`. Browser globals apply to `src/`, and Node globals apply to server and tool configuration files.
+
+Prettier formats TypeScript, TSX, CSS, JSON, HTML, and Markdown. Defaults live in `.prettierrc.json`: two spaces, single quotes, semicolons, trailing commas, LF line endings, and a 100-column target. ESLint checks code correctness; CSS formatting is handled by Prettier rather than linted as JavaScript. Generated output, dependencies, lockfiles, and environment files are excluded from formatting.
+
+```sh
+npm run lint         # Check JavaScript, TypeScript, React, and CSS rules
+npm run lint:fix     # Apply available ESLint and Stylelint fixes
+npm run format      # Format source, styles, and configuration
+npm run format:check
+```
+
+The checked-in VS Code workspace settings select **Prettier ESLint** (`rvest.vs-code-prettier-eslint`) for format-on-save, including TypeScript and CSS. The extension loads the locally installed `prettier-eslint` package, which supports the flat ESLint configuration; non-JavaScript languages use its Prettier formatting path. The optional Microsoft ESLint extension adds live diagnostics while editing. Install the recommended extensions when prompted, and reload VS Code if it was open during dependency installation.
+
+Stylelint enforces a blank line between CSS rules and before at-rules such as `@media`, without adding a blank line before the first rule inside a block. Its configuration is in `stylelint.config.js`. Both `npm run format` and `npm run lint:fix` apply these spacing fixes. Install the recommended **Stylelint** extension (`stylelint.vscode-stylelint`) to apply the same fixes when explicitly saving CSS in VS Code; the workspace settings enable its save action alongside Prettier formatting.
 
 ## Extending the app
 

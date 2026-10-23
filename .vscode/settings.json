@@ -1,0 +1,14 @@
+{
+  "[javascript][javascriptreact][typescript][typescriptreact][css][json][jsonc][html][markdown]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.formatOnType": false
+  },
+  "vs-code-prettier-eslint.prettierLast": false,
+  "[css]": {
+    "editor.codeActionsOnSave": {
+      "source.fixAll.stylelint": "explicit"
+    }
+  }
+}
