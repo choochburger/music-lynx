@@ -1,8 +1,8 @@
 import { Music2 } from 'lucide-react';
-import type { ServiceId } from '../shared/music';
+import { Service } from '../shared/music';
 
-export function ServiceIcon({ service }: { service: ServiceId }) {
-  if (service === 'spotify')
+export function ServiceIcon({ service }: { service: Service }) {
+  if (service === Service.Spotify)
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="11" fill="currentColor" />
@@ -11,7 +11,7 @@ export function ServiceIcon({ service }: { service: ServiceId }) {
         </g>
       </svg>
     );
-  if (service === 'apple_music') return <Music2 aria-hidden="true" strokeWidth={2} />;
+  if (service === Service.AppleMusic) return <Music2 aria-hidden="true" strokeWidth={2} />;
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <circle cx="11" cy="11" r="8.2" fill="none" stroke="currentColor" strokeWidth="2.5" />

@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { exampleUrl } from '../shared/music';
+import { Service, exampleUrl } from '../shared/music';
 
 afterEach(() => {
   cleanup();
@@ -13,9 +13,9 @@ const entity = {
   artist: 'Me First and the Gimme Gimmes',
   artwork: 'https://example.com/cover.jpg',
   links: {
-    spotify: exampleUrl,
-    qobuz: 'https://open.qobuz.com/track/123',
-    apple_music: 'https://music.apple.com/song/456',
+    [Service.Spotify]: exampleUrl,
+    [Service.Qobuz]: 'https://open.qobuz.com/track/123',
+    [Service.AppleMusic]: 'https://music.apple.com/song/456',
   },
 };
 
@@ -52,11 +52,11 @@ describe('the share flow', () => {
     expect(await screen.findByRole('heading', { name: entity.title })).toBeTruthy();
     expect(screen.getByRole('img').getAttribute('src')).toBe(entity.artwork);
     fireEvent.click(screen.getByRole('button', { name: 'Copy Qobuz link' }));
-    await waitFor(() => expect(writeText).toHaveBeenCalledWith(entity.links.qobuz));
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(entity.links[Service.Qobuz]));
     fireEvent.click(screen.getByRole('button', { name: 'Copy all!' }));
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith(
-        `1. Spotify: ${exampleUrl}\n2. Qobuz: ${entity.links.qobuz}\n3. Apple Music: ${entity.links.apple_music}`,
+        `1. Spotify: ${exampleUrl}\n2. Qobuz: ${entity.links[Service.Qobuz]}\n3. Apple Music: ${entity.links[Service.AppleMusic]}`,
       ),
     );
     expect(await screen.findByText('All available links copied. Ready to share!')).toBeTruthy();
@@ -65,7 +65,9 @@ describe('the share flow', () => {
   it('makes partial results and clipboard failures visible', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(Response.json({ ...entity, links: { spotify: exampleUrl } })),
+      vi
+        .fn()
+        .mockResolvedValue(Response.json({ ...entity, links: { [Service.Spotify]: exampleUrl } })),
     );
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: vi.fn().mockRejectedValue(new Error('Denied')) },

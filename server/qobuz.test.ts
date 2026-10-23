@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { qobuzIdentifier } from './qobuz';
 import { createResolver } from './resolver';
+import { Service } from '../shared/music';
 
 describe('Qobuz input bridge', () => {
   it.each([
@@ -38,8 +39,8 @@ describe('Qobuz input bridge', () => {
               title: 'Example',
               artist: 'Artist',
               platforms: {
-                qobuz: 'https://open.qobuz.com/track/1234',
-                apple_music: 'https://music.apple.com/song/123',
+                [Service.Qobuz]: 'https://open.qobuz.com/track/1234',
+                [Service.AppleMusic]: 'https://music.apple.com/song/123',
               },
             },
           ],

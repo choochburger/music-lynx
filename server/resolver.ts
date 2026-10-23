@@ -1,4 +1,4 @@
-import { parseMusicUrl, services, type MusicEntity } from '../shared/music.js';
+import { parseMusicUrl, Service, services, type MusicEntity } from '../shared/music.js';
 import { qobuzIdentifier } from './qobuz.js';
 import { ResolveError } from './errors.js';
 export { ResolveError } from './errors.js';
@@ -46,7 +46,9 @@ export function createResolver(
     const endpoint = new URL('https://api.musiclink.one/v2/resolve');
     endpoint.searchParams.set(
       'q',
-      source.service === 'qobuz' ? await qobuzIdentifier(source, qobuzAppId, request) : source.url,
+      source.service === Service.Qobuz
+        ? await qobuzIdentifier(source, qobuzAppId, request)
+        : source.url,
     );
     let response: Response;
     try {

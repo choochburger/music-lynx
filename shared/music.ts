@@ -1,23 +1,28 @@
+export enum Service {
+  Spotify = 'spotify',
+  Qobuz = 'qobuz',
+  AppleMusic = 'apple_music',
+}
+
 export const services = [
-  { id: 'spotify', name: 'Spotify' },
-  { id: 'qobuz', name: 'Qobuz' },
-  { id: 'apple_music', name: 'Apple Music' },
+  { id: Service.Spotify, name: 'Spotify' },
+  { id: Service.Qobuz, name: 'Qobuz' },
+  { id: Service.AppleMusic, name: 'Apple Music' },
 ] as const;
 
-export type ServiceId = (typeof services)[number]['id'];
 export type MusicEntity = {
   type: 'track' | 'album';
   title: string;
   artist: string;
   artwork?: string;
-  links: Partial<Record<ServiceId, string>>;
+  links: Partial<Record<Service, string>>;
 };
 
 export const exampleUrl = 'https://open.spotify.com/track/2DAvoJU1ZjcWVd8jL0OR8s';
 
 export function parseMusicUrl(input: string): {
   url: string;
-  service: ServiceId;
+  service: Service;
   type: MusicEntity['type'];
 } {
   let url: URL;
@@ -35,21 +40,21 @@ export function parseMusicUrl(input: string): {
   ) {
     throw new Error('Use a public HTTPS music link from Spotify, Qobuz, or Apple Music.');
   }
-  let service: ServiceId;
+  let service: Service;
   let type: MusicEntity['type'];
   const path = url.pathname;
   if (
     url.hostname === 'open.spotify.com' &&
     /^\/(?:intl-[a-z-]+\/)?(track|album)\/[A-Za-z0-9]{22}\/?$/.test(path)
   ) {
-    service = 'spotify';
+    service = Service.Spotify;
     type = path.includes('/track/') ? 'track' : 'album';
     url.pathname = path.replace(/^\/intl-[a-z-]+\//, '/');
   } else if (
     url.hostname === 'music.apple.com' &&
     /^\/(?:[a-z]{2}\/)?(?:album|song)\/(?:[^/]+\/)?\d+\/?$/.test(path)
   ) {
-    service = 'apple_music';
+    service = Service.AppleMusic;
     const track = url.searchParams.get('i');
     if (track !== null && !/^\d+$/.test(track))
       throw new Error('This Apple Music song link has an invalid track ID.');
@@ -60,14 +65,14 @@ export function parseMusicUrl(input: string): {
     (['www.qobuz.com', 'qobuz.com'].includes(url.hostname) &&
       /^\/[a-z]{2}-[a-z]{2}\/(track|album)\/[^/]+\/[A-Za-z0-9]+\/?$/.test(path))
   ) {
-    service = 'qobuz';
+    service = Service.Qobuz;
     type = path.includes('/track/') ? 'track' : 'album';
   } else {
     throw new Error(
       'That link isn’t supported yet. Use a full song or album URL from Spotify, Qobuz, or Apple Music.',
     );
   }
-  const appleTrack = service === 'apple_music' ? url.searchParams.get('i') : null;
+  const appleTrack = service === Service.AppleMusic ? url.searchParams.get('i') : null;
   url.search = '';
   url.hash = '';
   if (appleTrack) url.searchParams.set('i', appleTrack);

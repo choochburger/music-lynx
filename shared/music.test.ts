@@ -1,24 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { exampleUrl, formatLinks, parseMusicUrl } from './music';
+import { Service, exampleUrl, formatLinks, parseMusicUrl } from './music';
 
 describe('music URL validation', () => {
   it('removes tracking while retaining Apple Music’s song identity', () => {
     expect(parseMusicUrl(`${exampleUrl}?si=tracking#fragment`).url).toBe(exampleUrl);
     const apple = parseMusicUrl('https://music.apple.com/us/album/a-title/123456?i=78910&ls=1');
     expect(apple).toEqual({
-      service: 'apple_music',
+      service: Service.AppleMusic,
       type: 'track',
       url: 'https://music.apple.com/us/album/a-title/123456?i=78910',
     });
   });
 
   it.each([
-    ['https://open.qobuz.com/track/1234', 'qobuz', 'track'],
-    ['https://play.qobuz.com/album/abc123', 'qobuz', 'album'],
-    ['https://www.qobuz.com/us-en/album/a-title/abc123', 'qobuz', 'album'],
-    ['https://music.apple.com/us/song/a-title/123456', 'apple_music', 'track'],
-    ['https://music.apple.com/us/album/a-title/123456', 'apple_music', 'album'],
-    ['https://open.spotify.com/intl-de/album/2DAvoJU1ZjcWVd8jL0OR8s', 'spotify', 'album'],
+    ['https://open.qobuz.com/track/1234', Service.Qobuz, 'track'],
+    ['https://play.qobuz.com/album/abc123', Service.Qobuz, 'album'],
+    ['https://www.qobuz.com/us-en/album/a-title/abc123', Service.Qobuz, 'album'],
+    ['https://music.apple.com/us/song/a-title/123456', Service.AppleMusic, 'track'],
+    ['https://music.apple.com/us/album/a-title/123456', Service.AppleMusic, 'album'],
+    ['https://open.spotify.com/intl-de/album/2DAvoJU1ZjcWVd8jL0OR8s', Service.Spotify, 'album'],
   ])('recognizes %s', (url, service, type) => {
     expect(parseMusicUrl(url)).toMatchObject({ service, type });
   });
@@ -44,8 +44,8 @@ describe('music URL validation', () => {
         title: 'Song',
         artist: 'Artist',
         links: {
-          apple_music: 'https://music.apple.com/song/123',
-          spotify: exampleUrl,
+          [Service.AppleMusic]: 'https://music.apple.com/song/123',
+          [Service.Spotify]: exampleUrl,
         },
       }),
     ).toBe(`1. Spotify: ${exampleUrl}\n2. Apple Music: https://music.apple.com/song/123`);

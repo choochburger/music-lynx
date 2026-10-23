@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 import { createResolver } from './resolver';
-import { exampleUrl } from '../shared/music';
+import { Service, exampleUrl } from '../shared/music';
 
 const item = {
   type: 'track',
@@ -9,9 +9,9 @@ const item = {
   artist: 'Me First and the Gimme Gimmes',
   image_url: 'https://example.com/art.jpg',
   platforms: {
-    spotify: exampleUrl,
-    qobuz: 'https://open.qobuz.com/track/123',
-    apple_music: 'https://music.apple.com/us/album/a-title/123?i=456',
+    [Service.Spotify]: exampleUrl,
+    [Service.Qobuz]: 'https://open.qobuz.com/track/123',
+    [Service.AppleMusic]: 'https://music.apple.com/us/album/a-title/123?i=456',
   },
 };
 
@@ -46,15 +46,15 @@ describe('live resolver adapter', () => {
           {
             ...item,
             platforms: {
-              qobuz: 'javascript:alert(1)',
-              apple_music: 'https://music.apple.com/us/album/album/123',
+              [Service.Qobuz]: 'javascript:alert(1)',
+              [Service.AppleMusic]: 'https://music.apple.com/us/album/album/123',
             },
           },
         ],
       }),
     );
     expect((await createResolver('key', request)(exampleUrl)).links).toEqual({
-      spotify: exampleUrl,
+      [Service.Spotify]: exampleUrl,
     });
   });
 
@@ -66,7 +66,9 @@ describe('live resolver adapter', () => {
           {
             ...item,
             title: 'Wrong release',
-            platforms: { spotify: 'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT' },
+            platforms: {
+              [Service.Spotify]: 'https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT',
+            },
           },
           item,
         ],
