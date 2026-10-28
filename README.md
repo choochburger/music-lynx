@@ -1,10 +1,34 @@
-# Music Lynx
+# Music Lynx 🎵
 
-> **Toy project:** This is a playground for messing around with Codex and music service APIs. I know there are already apps that do similar things -- this is just for fun and experimentation to make sharing generating and sharing music links with my friends easier 🤪 🎶
+![Music Lynx interface for finding and sharing music across streaming services](docs/images/music-lynx.png)
 
-A React + TypeScript SPA for sharing songs and albums between different services (Spotify, Apple Music, Qobuz, etc).
+A small full-stack application for finding and sharing songs and albums across Spotify, Apple Music, and Qobuz. Built as an experiment in AI-assisted development with OpenAI Codex, it turns a music link into artwork, metadata, and equivalent links to share with friends.
 
-Try the live app at [music-lynx.onrender.com](https://music-lynx.onrender.com/).
+[**Live Demo**](https://music-lynx.onrender.com/)
+
+**Tech:** React 19 · TypeScript · Node.js · Express · Vite · MusicLink API · Vitest · React Testing Library
+
+This is a personal learning project, not a commercial product. Similar apps already exist; this one is a playground for music APIs, full-stack development, and AI-assisted engineering.
+
+## Development approach
+
+I used Codex to build the application while directing the requirements, selecting the technology stack, and guiding implementation, testing, and verification. Codex helped explore architectural approaches, generate and refine code, troubleshoot API integrations, and evaluate deployment options; I applied engineering judgment to those decisions and the resulting behavior.
+
+The project explores how AI coding tools can support a small, complete application, including platform-specific URL handling, server-side API credentials, automated tests, and browser and live API checks. Verification limits, including Qobuz input support requiring an application key, are documented below.
+
+## How matching works
+
+1. The browser validates a full public song or album URL and requests `/api/resolve?url=…`.
+2. The Node server validates it again and calls [MusicLink’s documented v2 resolve endpoint](https://musiclink.one/docs). For Qobuz inputs, it first reads the ISRC (track) or UPC (album) from Qobuz’s application-key metadata API, then resolves that identifier. Only the server sees API keys.
+3. The adapter returns artwork, title, artist, and validated matching links for the three supported services. The original service link is retained. Missing matches are labeled unavailable and excluded from copied lists.
+
+Supported inputs: `open.spotify.com` track/album URLs (including localized URLs), `music.apple.com` song/album URLs (including `?i=` track links), `open.qobuz.com` and `play.qobuz.com` track/album URLs, and Qobuz’s regional public album/track URLs. Paste full links; shortened share URLs, playlists, and artists are outside this first version.
+
+MusicLink requires an account/API key and has plan quotas. A first lookup can take 10–15 seconds; the MusicLink request times out after 30 seconds. Qobuz metadata has a separate 10-second timeout. Matches depend on provider coverage and regional catalogs; this app cannot guarantee every service or edition will match. The app displays the provider’s returned metadata without overriding it.
+
+**Qobuz limitation:** although MusicLink lists Qobuz among its platforms, a live Qobuz URL request returned “Could not detect platform.” The Qobuz adapter avoids that unsupported input path. Fresh Qobuz lookups need `QOBUZ_APP_ID`; this adapter is covered by mocked tests but requires your issued key for live verification. Qobuz requires a valid application key under its [API terms](https://static.qobuz.com/apps/api/QobuzAPI-TermsofUse.pdf). Previously returned links resolve from the in-memory cache until it expires.
+
+Successful results are cached by service, item type, and catalog ID in memory for one hour, capped at 150 entries. A basic per-IP limit permits 10 requests per minute. Nothing is persisted. Spotify and Apple Music URLs are sent to MusicLink to perform matching; Qobuz IDs are sent to Qobuz and their ISRC/UPC is sent to MusicLink. Artwork loads from the provider’s image URL; fonts load from Google Fonts with system fallbacks.
 
 ## Local development
 
@@ -24,20 +48,6 @@ npm run dev
 
 Open **http://127.0.0.1:5173**. One process serves the API and Vite with React hot reload. Restart after changing `.env`. Without a key the UI works, but lookup requests return a clear setup error. There are no fake or hardcoded matches in the app. “Try an example” makes a live lookup of [“I’ll Be There” by Me First and the Gimme Gimmes](https://open.spotify.com/track/03Mh5n7N3Qz7LTrs1sV5mS).
 
-## How matching works
-
-1. The browser validates a full public song or album URL and requests `/api/resolve?url=…`.
-2. The Node server validates it again and calls [MusicLink’s documented v2 resolve endpoint](https://musiclink.one/docs). For Qobuz inputs, it first reads the ISRC (track) or UPC (album) from Qobuz’s application-key metadata API, then resolves that identifier. Only the server sees API keys.
-3. The adapter returns artwork, title, artist, and validated matching links for the three supported services. The original service link is retained. Missing matches are labeled unavailable and excluded from copied lists.
-
-Supported inputs: `open.spotify.com` track/album URLs (including localized URLs), `music.apple.com` song/album URLs (including `?i=` track links), `open.qobuz.com` and `play.qobuz.com` track/album URLs, and Qobuz’s regional public album/track URLs. Paste full links; shortened share URLs, playlists, and artists are outside this first version.
-
-MusicLink requires an account/API key and has plan quotas. A first lookup can take 10–15 seconds; the MusicLink request times out after 30 seconds. Qobuz metadata has a separate 10-second timeout. Matches depend on provider coverage and regional catalogs; this app cannot guarantee every service or edition will match. The app displays the provider’s returned metadata without overriding it.
-
-**Qobuz limitation:** although MusicLink lists Qobuz among its platforms, a live Qobuz URL request returned “Could not detect platform.” The Qobuz adapter avoids that unsupported input path. Fresh Qobuz lookups need `QOBUZ_APP_ID`; this adapter is covered by mocked tests but requires your issued key for live verification. Qobuz requires a valid application key under its [API terms](https://static.qobuz.com/apps/api/QobuzAPI-TermsofUse.pdf). Previously returned links resolve from the in-memory cache until it expires.
-
-Successful results are cached by validated service URL in memory for one hour, capped at 150 entries. A basic per-IP limit permits 10 requests per minute. Nothing is persisted. Spotify and Apple Music URLs are sent to MusicLink to perform matching; Qobuz IDs are sent to Qobuz and their ISRC/UPC is sent to MusicLink. Artwork loads from the provider’s image URL; fonts load from Google Fonts with system fallbacks.
-
 ## Build and verification
 
 ```sh
@@ -50,7 +60,7 @@ npm start
 
 Tests cover input validation, tracking removal, Apple track identity, numbered copying, provider errors/timeouts, cache reuse, missing configuration, untrusted provider URLs, loading/results, partial matches, and clipboard failures. Provider responses in tests are synthetic fixtures, not verified catalog mappings.
 
-Verified locally: 37 tests pass; production build and production HTTP smoke checks pass. Chrome checks cover desktop, 390 px and 320 px layouts, real clipboard copying, and live lookup results. The live Abbey Road album lookup returned Spotify and Apple Music, with Qobuz correctly shown as unavailable.
+Local verification has included a passing test suite, production builds, and production HTTP smoke checks. Chrome checks cover desktop, 390 px and 320 px layouts, real clipboard copying, and live lookup results. The live Abbey Road album lookup returned Spotify and Apple Music, with Qobuz correctly shown as unavailable.
 
 ## Linting and formatting
 
