@@ -16,6 +16,55 @@ const item = {
 };
 
 describe('live resolver adapter', () => {
+  it('explains monthly quota exhaustion without suggesting an immediate retry', async () => {
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(
+        Response.json(
+          { success: false, error: 'Monthly request limit exceeded.', plan: 'free' },
+          { status: 429 },
+        ),
+      );
+    await expect(createResolver('key', request)(exampleUrl)).rejects.toMatchObject({
+      status: 429,
+      message:
+        'MusicLink’s monthly lookup allowance has been reached. New lookups will be available when it resets on the 1st of next month.',
+    });
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [{ 'Retry-After': '1' }, { retryAfter: 1 }, '1 second'],
+    [{ 'Retry-After': '60' }, { retryAfter: 60 }, '60 seconds'],
+    [{}, { retryAfter: 60 }, '60 seconds'],
+  ])(
+    'explains temporary rate limits using the provider’s retry delay',
+    async (headers, body, delay) => {
+      const request = vi
+        .fn<typeof fetch>()
+        .mockResolvedValue(
+          Response.json(
+            { success: false, error: 'Rate limit exceeded.', ...body },
+            { status: 429, headers },
+          ),
+        );
+      await expect(createResolver('key', request)(exampleUrl)).rejects.toMatchObject({
+        status: 429,
+        message: `MusicLink is receiving too many requests. Please try again in ${delay}.`,
+      });
+    },
+  );
+
+  it('handles an unreadable rate-limit body without turning it into a server error', async () => {
+    const request = vi
+      .fn<typeof fetch>()
+      .mockResolvedValue(new Response('not JSON', { status: 429 }));
+    await expect(createResolver('key', request)(exampleUrl)).rejects.toMatchObject({
+      status: 429,
+      message: expect.stringContaining('MusicLink’s request limit has been reached.'),
+    });
+  });
+
   it('matches a shared Apple Music URL to the same song in the provider’s canonical URL', async () => {
     const input = 'https://music.apple.com/us/song/marlboro-rojo/1811903401';
     const canonical = 'https://music.apple.com/song/1811903401';

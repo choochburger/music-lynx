@@ -6,6 +6,10 @@ A small full-stack application for finding and sharing songs and albums across S
 
 [**Live Demo**](https://music-lynx.onrender.com/)
 
+**Deployment:** I deployed the React frontend and Node.js/Express API together on Render, configuring the production build, server startup, and environment variables for API credentials.
+
+> **Demo availability:** The demo uses MusicLink’s free API plan and shares its request allowance across all visitors. New lookups may stop working if that allowance is exhausted. The monthly allowance resets on the 1st; short-term rate limits may also require a brief wait. See [MusicLink’s API limits](https://musiclink.one/docs#rate-limits).
+
 **Tech:** React 19 · TypeScript · Node.js · Express · Vite · MusicLink API · Vitest · React Testing Library
 
 This is a personal learning project, not a commercial product. Similar apps already exist; this one is a playground for music APIs, full-stack development, and AI-assisted engineering.

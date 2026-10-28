@@ -86,14 +86,20 @@ describe('the share flow', () => {
     expect(await screen.findByText(/Clipboard access isn’t available/)).toBeTruthy();
   });
 
-  it('shows upstream errors and allows another attempt', async () => {
+  it.each([
+    [404, 'No match found.'],
+    [
+      429,
+      'MusicLink’s monthly lookup allowance has been reached. New lookups will be available when it resets on the 1st of next month.',
+    ],
+  ])('shows upstream %i errors and allows another attempt', async (status, message) => {
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue(Response.json({ error: 'No match found.' }, { status: 404 })),
+      vi.fn().mockResolvedValue(Response.json({ error: message }, { status })),
     );
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: /Try an example/ }));
-    expect((await screen.findByRole('alert')).textContent).toBe('No match found.');
+    expect((await screen.findByRole('alert')).textContent).toBe(message);
     expect((screen.getByRole('button', { name: 'Go!' }) as HTMLButtonElement).disabled).toBe(false);
   });
 });

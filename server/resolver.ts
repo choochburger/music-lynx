@@ -17,6 +17,8 @@ type ProviderItem = {
   platforms?: Record<string, unknown>;
 };
 
+type RateLimitBody = { plan?: unknown; retryAfter?: unknown };
+
 function publicImage(value: unknown): string | undefined {
   if (typeof value !== 'string') return;
   try {
@@ -69,11 +71,32 @@ export function createResolver(
         'Matching took too long or the music service couldn’t be reached. Please try again.',
       );
     }
-    if (response.status === 429)
+    if (response.status === 429) {
+      let limit: RateLimitBody | null = null;
+      try {
+        limit = (await response.json()) as RateLimitBody | null;
+      } catch {
+        // A missing or malformed error body should still produce a useful message.
+      }
+      const retryAfter = Number(response.headers.get('Retry-After') ?? limit?.retryAfter);
+      if (Number.isFinite(retryAfter) && retryAfter > 0) {
+        const seconds = Math.ceil(retryAfter);
+        throw new ResolveError(
+          429,
+          `MusicLink is receiving too many requests. Please try again in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`,
+        );
+      }
+      if (typeof limit?.plan === 'string' && limit.plan.trim()) {
+        throw new ResolveError(
+          429,
+          'MusicLink’s monthly lookup allowance has been reached. New lookups will be available when it resets on the 1st of next month.',
+        );
+      }
       throw new ResolveError(
         429,
-        'The matching service is busy or its lookup allowance has been reached. Please try again later.',
+        'MusicLink’s request limit has been reached. Please try again later; if the monthly allowance is exhausted, it resets on the 1st of next month.',
       );
+    }
     if (response.status === 401 || response.status === 403)
       throw new ResolveError(
         503,
